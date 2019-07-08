@@ -58,7 +58,7 @@ Check the compatibility here: https://caniuse.com/#search=mix-blend-mode
 ## ⭐ Show your support
 Please ⭐ this plugin if this project helped you!
 
-Also, it would be awesome if you left a review in WordPress if it helped you, you can do that by [clicking here](https://wordpress.org/support/plugin/blackout-darkmode-widget/reviews/#new-post).
+Also, it would be awesome if you could leave a review in WordPress if it helped you, you can do that by [clicking here](https://wordpress.org/support/plugin/blackout-darkmode-widget/reviews/#new-post).
 
 ## 🍺 Buy me a beer 
 If you like this plugin, feel free to donate:
