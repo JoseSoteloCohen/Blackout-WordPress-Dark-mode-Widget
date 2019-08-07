@@ -11,7 +11,10 @@ Sandoche made the widget and, it has a standalone version that allows you to imp
 
 ## ✨ Demo
 Check out the demo in these websites:
-- https://inboundlatino.com (this one has the WP Plugin)
+
+- https://inboundlatino.com/google-tag-manager/
+- https://cosasdeanas.com/documental-que-no-es-vegano-pero-que-podria-ser/
+- https://blog.cheaptotrip.com/mexico/cancun-viaje-divertido-e-inolvidable/
 
 These have the widget, but not the WordPress plugin
 
@@ -23,31 +26,15 @@ These have the widget, but not the WordPress plugin
 
 ## 📖 How to use
 As with any other WordPress plugin, you can follow this simple steps to install it:
+
 * Install using the WordPress built-in Plugin installer, or extract the zip file and drop the contents in the wp-content/plugins/ directory of your WordPress installation.
 * Activate the plugin through the ‘Plugins’ menu in WordPress.
 * Go to settings > Blackout to customize the configurations of the widget (optional).
 
 ## Override style
-* Use the class `darkmode-ignore` where you don't want to apply darkmode
-* It is also possible to revert the Dark Mode with this style `mix-blend-mode: difference;`
+* Use the class `darkmode-ignore` where you don't want to apply darkmode, it will implement `mix-blend-mode: difference;` but only when the widget is active, that way it won't look weird if it's disabled.
 
-### Examples
-```css
-.darkmode--activated p, .darkmode--activated li {
-  color: #000;
-}
-
-.button {
-  isolation: isolate;
-}
-
-.darkmode--activated .logo {
-  mix-blend-mode: difference;
-}
-```
-```html
-<span class="darkmode-ignore">😬<span>
-```
+**You don't need to do it with images or iframes as it's added by default.**
 
 ## Browser compatibility
 This library uses the CSS `mix-blend-mode: difference;` in order to provide the Dark Mode.
@@ -58,10 +45,11 @@ Check the compatibility here: https://caniuse.com/#search=mix-blend-mode
 ## ⭐ Show your support
 Please ⭐ this plugin if this project helped you!
 
-Also, it would be awesome if you could leave a review in WordPress if it helped you, you can do that by [clicking here](https://wordpress.org/support/plugin/blackout-darkmode-widget/reviews/#new-post).
+Also, if it helped you it would be awesome if you could leave a review in WordPress, you can do that by [clicking here](https://wordpress.org/support/plugin/blackout-darkmode-widget/reviews/#new-post).
 
-## 🍺 Buy me a beer 
+## Want to help?
 If you like this plugin, feel free to donate:
+
 * [Donation Page](https://compras.inboundlatino.com/blackout/?ref=github) (Paypal and Credit Card with Stripe)
 * Bitcoin: 12Nth97LEFYFiWJ66PEhHfWbwFPT8fnznN
 * Ethereum: 0x6a5bF47fef1fC52BC41ca190b11E05Ac95490D0a
