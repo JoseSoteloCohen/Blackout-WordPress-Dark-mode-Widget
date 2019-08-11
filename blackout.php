@@ -73,11 +73,29 @@ class BlackoutSettings
 
         add_settings_section(
             'blackout_main_section', // ID
-            'My Custom Settings', // Title
+            'Custom Position', // Title
             array( $this, 'blackout_print_main_section_info' ), // Callback
             'blackout_settings_admin_page' // Page
         );
-
+        add_settings_section(
+            'blackout_positions_section', // ID
+            'Pre-Defined Positions', // Title
+            array( $this, 'blackout_print_positions_section_info' ), // Callback
+            'blackout_settings_admin_page' // Page
+        );
+        add_settings_section(
+            'blackout_widget_section', // ID
+            'Widget Settings', // Title
+            array( $this, 'blackout_print_main_section_info' ), // Callback
+            'blackout_settings_admin_page' // Page
+        );
+        add_settings_field(
+            'blackout_only_posts',
+            'Show in posts only',
+            array( $this, 'blackout_only_posts_callback' ),
+            'blackout_settings_admin_page',
+            'blackout_main_section'
+        );
         add_settings_field(
             'blackout_bottom', // ID
             'Bottom', // Title
@@ -115,35 +133,42 @@ class BlackoutSettings
             'Button Dark',
             array( $this, 'blackout_button_dark_callback' ),
             'blackout_settings_admin_page',
-            'blackout_main_section'
+            'blackout_widget_section'
         );
         add_settings_field(
             'blackout_button_light',
             'Button Light',
             array( $this, 'blackout_button_light_callback' ),
             'blackout_settings_admin_page',
-            'blackout_main_section'
+            'blackout_widget_section'
         );
         add_settings_field(
             'blackout_button_size',
             'Button Size',
             array( $this, 'blackout_button_size_callback' ),
             'blackout_settings_admin_page',
-            'blackout_main_section'
+            'blackout_widget_section'
         );
         add_settings_field(
             'blackout_icon_size',
             'Icon Size',
             array( $this, 'blackout_icon_size_callback' ),
             'blackout_settings_admin_page',
-            'blackout_main_section'
+            'blackout_widget_section'
         );
         add_settings_field(
-            'blackout_only_posts',
-            'Show in posts only',
-            array( $this, 'blackout_only_posts_callback' ),
+            'blackout_left_bottom',
+            'Bottom Left',
+            array( $this, 'blackout_left_bottom_callback' ),
             'blackout_settings_admin_page',
-            'blackout_main_section'
+            'blackout_positions_section'
+        );
+        add_settings_field(
+            'blackout_right_bottom',
+            'Bottom Right',
+            array( $this, 'blackout_right_bottom_callback' ),
+            'blackout_settings_admin_page',
+            'blackout_positions_section'
         );
 
     }
@@ -182,6 +207,12 @@ class BlackoutSettings
         if( isset( $input['blackout_only_posts'] ) )
             $new_input['blackout_only_posts'] = absint( $input['blackout_only_posts'] );
 
+        if( isset( $input['blackout_left_bottom'] ) )
+            $new_input['blackout_left_bottom'] = absint( $input['blackout_left_bottom'] );
+
+        if( isset( $input['blackout_right_bottom'] ) )
+            $new_input['blackout_right_bottom'] = absint( $input['blackout_right_bottom'] );
+
         return $new_input;
     }
     /**
@@ -190,6 +221,10 @@ class BlackoutSettings
     public function blackout_print_main_section_info()
     {
         print 'Enter your settings below:';
+    }
+    public function blackout_print_positions_section_info()
+    {
+        print 'Choose the position that you prefer:';
     }
     /**
      * Get the settings option array and print one of its values
@@ -258,12 +293,66 @@ class BlackoutSettings
             isset( $this->options['blackout_only_posts'] ) ? esc_attr( $this->options['blackout_only_posts']) : ''
         );
     }
+    public function blackout_left_bottom_callback()
+    {
+        printf(
+            '<input type="checkbox" id="blackout_left_bottom" name="blackout_options[blackout_left_bottom]" value="1"' . checked( 1, $this->options['blackout_left_bottom'], false ) . ' />',
+            isset( $this->options['blackout_left_bottom'] ) ? esc_attr( $this->options['blackout_left_bottom']) : ''
+        );
+    }
+    public function blackout_right_bottom_callback()
+    {
+        printf(
+            '<input type="checkbox" id="blackout_right_bottom" name="blackout_options[blackout_right_bottom]" value="1"' . checked( 1, $this->options['blackout_right_bottom'], false ) . ' />',
+            isset( $this->options['blackout_right_bottom'] ) ? esc_attr( $this->options['blackout_right_bottom']) : ''
+        );
+    }
 }
 function blackout_enqueues(){
     $blackout_options = get_option('blackout_options');
     wp_enqueue_script('blackout_script', plugin_dir_url( __FILE__ ) . 'js/blackout.js', array(), '1.0', 'true');
     wp_enqueue_style('blackout_style', plugin_dir_url( __FILE__ ) . 'css/blackout.css');
-    $blackout_custom_js = "
+    $blackout_custom_css = ".darkmode-toggle>img{
+            width: {$blackout_options['blackout_icon_size']}rem !important;
+            height:{$blackout_options['blackout_icon_size']}rem !important;
+        }
+        .darkmode-toggle {
+            width:{$blackout_options['blackout_button_size']}rem !important;
+            height:{$blackout_options['blackout_button_size']}rem !important;
+        }
+        ";
+    wp_add_inline_style('blackout_style', $blackout_custom_css);
+}
+function blackout_position(){
+    $blackout_options = get_option('blackout_options');
+    if ($blackout_options['blackout_left_bottom'] == '1'){
+        $blackout_custom_js = "
+        var options = {
+            bottom: '{$blackout_options['blackout_bottom']}', // default: '32px'
+            right: 'unset',
+            left: '32px', // default: '32px'
+            time: '{$blackout_options['blackout_time']}', // default: '0.3s'
+            buttonColorDark: '{$blackout_options['blackout_button_dark']}',  // default: '#100f2c'
+            buttonColorLight: '{$blackout_options['blackout_button_light']}', // default: '#fff'
+            label: '🌓' // default: ''
+        }
+        const darkmode = new Darkmode(options);
+        darkmode.showWidget();";
+    }elseif ($blackout_options['blackout_right_bottom'] == '1'){
+        $blackout_custom_js = "
+        var options = {
+            bottom: '{$blackout_options['blackout_bottom']}', // default: '32px'
+            right: '{$blackout_options['blackout_right']}', // default: '32px'
+            left: 'unset', // default: 'unset'
+            time: '{$blackout_options['blackout_time']}', // default: '0.3s'
+            buttonColorDark: '{$blackout_options['blackout_button_dark']}',  // default: '#100f2c'
+            buttonColorLight: '{$blackout_options['blackout_button_light']}', // default: '#fff'
+            label: '🌓' // default: ''
+        }
+        const darkmode = new Darkmode(options);
+        darkmode.showWidget();";
+    }else{
+        $blackout_custom_js = "
         var options = {
             bottom: '{$blackout_options['blackout_bottom']}', // default: '32px'
             right: '{$blackout_options['blackout_right']}', // default: '32px'
@@ -275,26 +364,21 @@ function blackout_enqueues(){
         }
         const darkmode = new Darkmode(options);
         darkmode.showWidget();";
+    }
+
 
     wp_add_inline_script('blackout_script', $blackout_custom_js);
-    $blackout_custom_css = ".darkmode-toggle>img{
-            width: {$blackout_options['blackout_icon_size']}rem !important;
-            height:{$blackout_options['blackout_icon_size']}rem !important;
-        }
-        .darkmode-toggle {
-            width:{$blackout_options['blackout_button_size']}rem !important;
-            height:{$blackout_options['blackout_button_size']}rem !important;
-        }";
-    wp_add_inline_style('blackout_style', $blackout_custom_css);
 }
 function blackout_init(){
     $blackout_options = get_option('blackout_options');
     if($blackout_options['blackout_only_posts'] == '1'){
         if(is_single()){
             add_action( 'wp_enqueue_scripts', 'blackout_enqueues' );
+            add_action( 'wp_enqueue_scripts', 'blackout_position' );
         }
     }else{
         add_action( 'wp_enqueue_scripts', 'blackout_enqueues' );
+        add_action( 'wp_enqueue_scripts', 'blackout_position' );
     }
 }
 $blackout_options = get_option('blackout_options');
