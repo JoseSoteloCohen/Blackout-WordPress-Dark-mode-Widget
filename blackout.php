@@ -1,9 +1,9 @@
 <?php
 
 /*
-Plugin Name: Blackout
+Plugin Name: Blackout: Dark Mode Widget
 Description: Adds a toggle widget to your website that activates dark mode on click.
-Version: 1.0.2
+Version: 1.3.0
 Author: José Sotelo
 Author URI: https://inboundlatino.com
 */
@@ -89,6 +89,12 @@ class BlackoutSettings
             array( $this, 'blackout_print_main_section_info' ), // Callback
             'blackout_settings_admin_page' // Page
         );
+        add_settings_section(
+            'blackout_extras_section', // ID
+            'Extra Settings', // Title
+            array( $this, 'blackout_print_extra_settings' ), // Callback
+            'blackout_settings_admin_page' // Page
+        );
         add_settings_field(
             'blackout_only_posts',
             'Show in posts only',
@@ -170,6 +176,20 @@ class BlackoutSettings
             'blackout_settings_admin_page',
             'blackout_positions_section'
         );
+        add_settings_field(
+            'blackout_cookies',
+            'Want to create a cookie?',
+            array( $this, 'blackout_cookies_callback' ),
+            'blackout_settings_admin_page',
+            'blackout_extras_section'
+        );
+        add_settings_field(
+            'blackout_match_os',
+            'Want to match the OS mode?',
+            array( $this, 'blackout_match_os_callback' ),
+            'blackout_settings_admin_page',
+            'blackout_extras_section'
+        );
 
     }
     /**
@@ -213,6 +233,11 @@ class BlackoutSettings
         if( isset( $input['blackout_right_bottom'] ) )
             $new_input['blackout_right_bottom'] = absint( $input['blackout_right_bottom'] );
 
+        if( isset( $input['blackout_match_os'] ) )
+            $new_input['blackout_match_os'] = absint( $input['blackout_match_os'] );
+        if( isset( $input['blackout_cookies'] ) )
+            $new_input['blackout_cookies'] = absint( $input['blackout_cookies'] );
+
         return $new_input;
     }
     /**
@@ -225,6 +250,11 @@ class BlackoutSettings
     public function blackout_print_positions_section_info()
     {
         print 'Choose the position that you prefer:';
+    }
+    public function blackout_print_extra_settings()
+    {
+        echo '<p>The cookies will allow the plugin to keep the dark mode active if the user enabled it previously.
+              </br>The match OS will allow the plugin to activate dark mode if the OS or browser are in Dark Mode</p>';
     }
     /**
      * Get the settings option array and print one of its values
@@ -307,6 +337,20 @@ class BlackoutSettings
             isset( $this->options['blackout_right_bottom'] ) ? esc_attr( $this->options['blackout_right_bottom']) : ''
         );
     }
+    public function blackout_match_os_callback()
+    {
+        printf(
+            '<input type="checkbox" id="blackout_match_os" name="blackout_options[blackout_match_os]" value="1"' . checked( 1, $this->options['blackout_match_os'], false ) . ' />',
+            isset( $this->options['blackout_match_os'] ) ? esc_attr( $this->options['blackout_match_os']) : ''
+        );
+    }
+    public function blackout_cookies_callback()
+    {
+        printf(
+            '<input type="checkbox" id="blackout_cookies" name="blackout_options[blackout_cookies]" value="1"' . checked( 1, $this->options['blackout_cookies'], false ) . ' />',
+            isset( $this->options['blackout_cookies'] ) ? esc_attr( $this->options['blackout_cookies']) : ''
+        );
+    }
 }
 function blackout_enqueues(){
     $blackout_options = get_option('blackout_options');
@@ -325,6 +369,18 @@ function blackout_enqueues(){
 }
 function blackout_position(){
     $blackout_options = get_option('blackout_options');
+    $blackout_cookies = "false";
+    $blackout_match_os = "false";
+    if ($blackout_options['blackout_cookies'] == 1){
+        $blackout_cookies = "true";
+    }else{
+        $blackout_cookies = "false";
+    }
+    if ($blackout_options['blackout_match_os'] == 1){
+        $blackout_match_os= "true";
+    }else{
+        $blackout_match_os = "false";
+    }
     if ($blackout_options['blackout_left_bottom'] == '1'){
         $blackout_custom_js = "
         var options = {
@@ -334,6 +390,8 @@ function blackout_position(){
             time: '{$blackout_options['blackout_time']}', // default: '0.3s'
             buttonColorDark: '{$blackout_options['blackout_button_dark']}',  // default: '#100f2c'
             buttonColorLight: '{$blackout_options['blackout_button_light']}', // default: '#fff'
+            saveInCookies: '{$blackout_cookies}', // default: true
+            autoMatchOsTheme: '{$blackout_match_os}', // default: true
             label: '🌓' // default: ''
         }
         const darkmode = new Darkmode(options);
@@ -347,6 +405,8 @@ function blackout_position(){
             time: '{$blackout_options['blackout_time']}', // default: '0.3s'
             buttonColorDark: '{$blackout_options['blackout_button_dark']}',  // default: '#100f2c'
             buttonColorLight: '{$blackout_options['blackout_button_light']}', // default: '#fff'
+            saveInCookies: '{$blackout_cookies}', // default: true
+            autoMatchOsTheme: '{$blackout_match_os}', // default: true
             label: '🌓' // default: ''
         }
         const darkmode = new Darkmode(options);
@@ -360,6 +420,8 @@ function blackout_position(){
             time: '{$blackout_options['blackout_time']}', // default: '0.3s'
             buttonColorDark: '{$blackout_options['blackout_button_dark']}',  // default: '#100f2c'
             buttonColorLight: '{$blackout_options['blackout_button_light']}', // default: '#fff'
+            saveInCookies: '{$blackout_cookies}', // default: true
+            autoMatchOsTheme: '{$blackout_match_os}', // default: true
             label: '🌓' // default: ''
         }
         const darkmode = new Darkmode(options);
