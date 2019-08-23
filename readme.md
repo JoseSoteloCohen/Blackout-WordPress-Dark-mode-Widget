@@ -1,4 +1,6 @@
 # Blackout: Dark Mode Widget for WordPress
+![WordPress Plugin Downloads](https://img.shields.io/wordpress/plugin/dt/blackout-darkmode-widget?color=blue)  ![WordPress Plugin Active Installs](https://img.shields.io/wordpress/plugin/installs/blackout-darkmode-widget?color=blue) ![WordPress Plugin Version](https://img.shields.io/wordpress/plugin/v/blackout-darkmode-widget?color=blue) ![WordPress Plugin Rating](https://img.shields.io/wordpress/plugin/stars/blackout-darkmode-widget?color=blue)
+
 🌓 Add a Dark Mode / Night Mode to your website in a few seconds
 
 A simple solution to allow your users to enable/disable dark mode on your website.
