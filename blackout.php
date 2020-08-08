@@ -3,7 +3,7 @@
 /*
 Plugin Name: Blackout: Dark Mode Widget
 Description: Adds a toggle widget to your website that activates dark mode on click.
-Version: 1.3.0
+Version: 2.0.1
 Author: José Sotelo
 Author URI: https://inboundlatino.com
 */
@@ -190,6 +190,13 @@ class BlackoutSettings
             'blackout_settings_admin_page',
             'blackout_extras_section'
         );
+        add_settings_field(
+            'blackout_toggle',
+            'Want to use your own toggle widget or button?',
+            array( $this, 'blackout_toggle_callback' ),
+            'blackout_settings_admin_page',
+            'blackout_extras_section'
+        );
 
     }
     /**
@@ -235,8 +242,12 @@ class BlackoutSettings
 
         if( isset( $input['blackout_match_os'] ) )
             $new_input['blackout_match_os'] = absint( $input['blackout_match_os'] );
+
         if( isset( $input['blackout_cookies'] ) )
             $new_input['blackout_cookies'] = absint( $input['blackout_cookies'] );
+
+        if( isset( $input['blackout_toggle'] ) )
+            $new_input['blackout_toggle'] = absint( $input['blackout_toggle'] );
 
         return $new_input;
     }
@@ -253,8 +264,9 @@ class BlackoutSettings
     }
     public function blackout_print_extra_settings()
     {
-        echo '<p>The cookies will allow the plugin to keep the dark mode active if the user enabled it previously.
-              </br>The match OS will allow the plugin to activate dark mode if the OS or browser are in Dark Mode</p>';
+        echo '<p>The cookies will allow the plugin to keep the dark mode active if the user enabled it previously.</p>
+              <p>The match OS will allow the plugin to activate dark mode if the OS or browser are in Dark Mode</p>
+              <p>Want to use your own widget or element as toggle? mark the last checkbox with the label <strong>Want to use your own toggle widget or button?</strong>, then add the class <strong><i>darkmode-enable</i></strong> to the element that you want to use as toggle.</p>';
     }
     /**
      * Get the settings option array and print one of its values
@@ -351,6 +363,13 @@ class BlackoutSettings
             isset( $this->options['blackout_cookies'] ) ? esc_attr( $this->options['blackout_cookies']) : ''
         );
     }
+    public function blackout_toggle_callback()
+    {
+        printf(
+            '<input type="checkbox" id="blackout_toggle" name="blackout_options[blackout_toggle]" value="1"' . checked( 1, $this->options['blackout_toggle'], false ) . ' />',
+            isset( $this->options['blackout_toggle'] ) ? esc_attr( $this->options['blackout_toggle']) : ''
+        );
+    }
 }
 function blackout_enqueues(){
     $blackout_options = get_option('blackout_options');
@@ -371,6 +390,13 @@ function blackout_position(){
     $blackout_options = get_option('blackout_options');
     $blackout_cookies = "false";
     $blackout_match_os = "false";
+    $blackout_toggle = "const darkmode = new Darkmode(options); darkmode.showWidget();";
+    $blackout_bottom = "false";
+    $blackout_left = "false";
+    $blackout_right = "false";
+    $blackout_time = "false";
+
+    //Extra options
     if ($blackout_options['blackout_cookies'] == 1){
         $blackout_cookies = "true";
     }else{
@@ -381,51 +407,65 @@ function blackout_position(){
     }else{
         $blackout_match_os = "false";
     }
+    if ($blackout_options['blackout_toggle'] == 1){
+        $blackout_toggle = "const darkmode = new Darkmode(options);";
+    }else{
+        $blackout_toggle = "const darkmode = new Darkmode(options); darkmode.showWidget();";
+    }
+
+    // Custom Position
+    $blackout_options['blackout_bottom'] !== '' ? $blackout_bottom = $blackout_options['blackout_bottom'] : $blackout_bottom = '32px';
+    $blackout_options['blackout_right'] !== '' ? $blackout_right = $blackout_options['blackout_right'] : $blackout_right = '32px';
+    $blackout_options['blackout_left'] !== '' ? $blackout_left = $blackout_options['blackout_left'] : $blackout_left = 'unset';
+    $blackout_options['blackout_time'] !== '' ? $blackout_time = $blackout_options['blackout_time'] : $blackout_time = '0.3s';
+
+
+
     if ($blackout_options['blackout_left_bottom'] == '1'){
         $blackout_custom_js = "
         var options = {
-            bottom: '{$blackout_options['blackout_bottom']}', // default: '32px'
+            bottom: '{$blackout_bottom}', // default: '32px'
             right: 'unset',
-            left: '32px', // default: '32px'
-            time: '{$blackout_options['blackout_time']}', // default: '0.3s'
+            left: '{$blackout_left}', // default: '32px'
+            time: '{$blackout_time}', // default: '0.3s'
             buttonColorDark: '{$blackout_options['blackout_button_dark']}',  // default: '#100f2c'
             buttonColorLight: '{$blackout_options['blackout_button_light']}', // default: '#fff'
-            saveInCookies: '{$blackout_cookies}', // default: true
-            autoMatchOsTheme: '{$blackout_match_os}', // default: true
+            saveInCookies: {$blackout_cookies}, // default: true
+            autoMatchOsTheme: {$blackout_match_os}, // default: true
             label: '🌓' // default: ''
         }
-        const darkmode = new Darkmode(options);
-        darkmode.showWidget();";
+        {$blackout_toggle}
+        ";
     }elseif ($blackout_options['blackout_right_bottom'] == '1'){
         $blackout_custom_js = "
         var options = {
-            bottom: '{$blackout_options['blackout_bottom']}', // default: '32px'
-            right: '{$blackout_options['blackout_right']}', // default: '32px'
+            bottom: '{$blackout_bottom}', // default: '32px'
+            right: '{$blackout_right}', // default: '32px'
             left: 'unset', // default: 'unset'
-            time: '{$blackout_options['blackout_time']}', // default: '0.3s'
+            time: '{$blackout_time}', // default: '0.3s'
             buttonColorDark: '{$blackout_options['blackout_button_dark']}',  // default: '#100f2c'
             buttonColorLight: '{$blackout_options['blackout_button_light']}', // default: '#fff'
-            saveInCookies: '{$blackout_cookies}', // default: true
-            autoMatchOsTheme: '{$blackout_match_os}', // default: true
+            saveInCookies: {$blackout_cookies}, // default: true
+            autoMatchOsTheme: {$blackout_match_os}, // default: true
             label: '🌓' // default: ''
         }
-        const darkmode = new Darkmode(options);
-        darkmode.showWidget();";
+         {$blackout_toggle}
+         ";
     }else{
         $blackout_custom_js = "
         var options = {
-            bottom: '{$blackout_options['blackout_bottom']}', // default: '32px'
-            right: '{$blackout_options['blackout_right']}', // default: '32px'
-            left: '{$blackout_options['blackout_left']}', // default: 'unset'
-            time: '{$blackout_options['blackout_time']}', // default: '0.3s'
+            bottom: '{$blackout_bottom}', // default: '32px'
+            right: '{$blackout_right}', // default: '32px'
+            left: '{$blackout_left}', // default: 'unset'
+            time: '{$blackout_time}', // default: '0.3s'
             buttonColorDark: '{$blackout_options['blackout_button_dark']}',  // default: '#100f2c'
             buttonColorLight: '{$blackout_options['blackout_button_light']}', // default: '#fff'
-            saveInCookies: '{$blackout_cookies}', // default: true
-            autoMatchOsTheme: '{$blackout_match_os}', // default: true
+            saveInCookies: {$blackout_cookies}, // default: true
+            autoMatchOsTheme: {$blackout_match_os}, // default: true
             label: '🌓' // default: ''
         }
-        const darkmode = new Darkmode(options);
-        darkmode.showWidget();";
+        {$blackout_toggle}
+        ";
     }
 
 
